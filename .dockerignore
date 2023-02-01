@@ -1,0 +1,6 @@
+/.git
+/__local__
+/docker
+/venv
+/log
+*.env*%
