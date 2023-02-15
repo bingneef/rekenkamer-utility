@@ -1,7 +1,11 @@
 FROM tiangolo/uwsgi-nginx-flask:python3.11
+ENV POETRY_VERSION=1.3.2
 
-COPY ./requirements.txt /app/requirements.txt
+RUN pip install poetry==$POETRY_VERSION
 
-RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
+COPY poetry.lock pyproject.toml /app/
+
+RUN poetry export --format requirements.txt > requirements.txt
+RUN pip3 install -r requirements.txt
 
 COPY . /app

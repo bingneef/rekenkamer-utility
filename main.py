@@ -1,26 +1,55 @@
-from flask import Flask, send_file, request
-import zipfile
-import io
-from util.s3 import get_document
+from flask import Flask, send_file, request, abort, redirect
+from app.util.log import logging
+from app.models.user import User
+from app.util.zip import generate_zip_buffer, unique_custom_engines
+from app.util.s3 import get_presigned_url
+from app.util.app_engine import verify_access
 
 app = Flask(__name__)
 
 
-def generate_zip(paths: list[str], keep_folder_structure=False) -> io.BytesIO:
-    zip_buffer = io.BytesIO()
+@app.route('/healthcheck')
+def healthcheck():
+    return {
+        'status': 'ok'
+    }
 
-    with zipfile.ZipFile(zip_buffer, "a",
-                         zipfile.ZIP_DEFLATED, False) as zip_file:
-        for path in paths:
-            filename = path.split('/')[-1]
-            result_folder_in_zip = f"documents/{filename}"
-            if keep_folder_structure:
-                result_folder_in_zip = f"documents/{path}"
 
-            zip_file.writestr(result_folder_in_zip, get_document(path))
+@app.route('/auth/login', methods=['POST'])
+def login():
+    email = request.form.get('email')
+    password = request.form.get('password')
 
-    zip_buffer.seek(0)
-    return zip_buffer
+    user = User.find_user(email)
+    if user is None:
+        logging.info("User not found, invalid email")
+        abort(401, description="Invalid credentials")
+
+    if not user.verify_password(password):
+        logging.info("User not found, invalid password")
+        abort(401, description="Invalid credentials")
+
+    return {
+        'display_name': user.display_name,
+        'search_api_key': user.search_api_key_fmt,
+        'document_access_token': user.document_access_token
+    }
+
+
+@app.route('/private-document/<path:document_path>', methods=['GET'])
+def get_custom_document(document_path):
+    print(f"Getting custom document {document_path}")
+
+    if document_path[:14] == 'source--custom':
+        api_key = User.decode_document_access_token(request.values['access_token'])
+        engine = document_path.split('/')[1]
+
+        if not verify_access(api_key, engine):
+            raise Exception('No access to engine')
+
+    document_url = get_presigned_url(document_path)
+
+    return redirect(document_url)
 
 
 @app.route('/zip', methods=['POST'])
@@ -32,7 +61,15 @@ def download_zip():
     if filename[-4:] != '.zip':
         filename = f"{filename}.zip"
 
-    zip_io_buffer = generate_zip(paths, keep_folder_structure)
+    custom_sources = unique_custom_engines(paths)
+    if len(custom_sources) > 0:
+        api_key = User.decode_document_access_token(request.values['access_token'])
+
+        for custom_source in custom_sources:
+            if not verify_access(api_key, custom_source):
+                raise Exception('No access to engine')
+
+    zip_io_buffer = generate_zip_buffer(paths, keep_folder_structure)
 
     return send_file(
         zip_io_buffer,

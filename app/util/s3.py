@@ -1,6 +1,8 @@
 import os
+from app.util.log import logging
 
 from minio import Minio
+from datetime import timedelta
 
 MINIO_HOST = os.getenv('MINIO_HOST', "localhost:9000")
 MINIO_ACCESS_KEY = os.getenv('MINIO_ACCESS_KEY', "airflow")
@@ -17,12 +19,32 @@ def get_client():
     )
 
 
+def get_presigned_url(path):
+    client = get_client()
+    bucket_name = path.split('/')[0]
+    object_name = "/".join(path.split('/')[1:])
+
+    # Make the link 1 minute valid
+    expires = timedelta(minutes=1)
+
+    url = client.get_presigned_url(
+        "GET",
+        bucket_name,
+        object_name,
+        expires=expires
+    )
+
+    return url
+
+
 def get_document(path):
     client = get_client()
     response = None
 
     bucket_name = path.split('/')[0]
     object_name = "/".join(path.split('/')[1:])
+
+    logging.info(f"Retrieving - path: {path}, bucket_name: {bucket_name}, object_name: {object_name}")
 
     try:
         response = client.get_object(

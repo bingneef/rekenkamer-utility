@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "rekenkamer-utility"
+version = "0.1.0"
+description = ""
+authors = ["Bing Steup <bingsteup@gmail.com>"]
+readme = "README.md"
+packages = [{include = "rekenkamer_utility"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+bcrypt = "^4.0.1"
+flask = "^2.2.2"
+pymongo = "^4.3.3"
+python-dotenv = "^0.21.1"
+minio = "^7.1.13"
+cryptography = "^39.0.0"
+elastic-enterprise-search = "^8.4.0"
+pytest = "^7.2.1"
+flake8 = "^6.0.0"
+pytest-cov = "^4.0.0"
+time-machine = "^2.9.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

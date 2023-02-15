@@ -3,4 +3,4 @@
 /docker
 /venv
 /log
-*.env*%
+*.env*

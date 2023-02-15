@@ -1,1 +1,17 @@
+.*env
 .idea
+.coverage
+.vscode
+__pycache__
+/docker
+/data
+/tmp
+/log
+
+/venv/
+
+/__local__
+
+.DS_Store
+
+!**/.gitkeep
