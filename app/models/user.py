@@ -9,7 +9,10 @@ from cryptography.fernet import Fernet
 
 table_name = "users"
 
-fernet = Fernet(base64.urlsafe_b64encode(os.environ['SECRET_KEY'].encode('ascii')))
+
+fernet = Fernet(
+    base64.urlsafe_b64encode(os.getenv("SECRET_KEY", "12345678901234567890123456789012").encode('ascii'))
+)
 
 
 @dataclass
