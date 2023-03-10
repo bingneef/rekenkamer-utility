@@ -1,5 +1,5 @@
 import os
-from app.util.log import logging
+from src.util.log import logging
 
 from minio import Minio
 from datetime import timedelta

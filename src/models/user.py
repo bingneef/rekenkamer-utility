@@ -1,16 +1,12 @@
-import os
-import base64
 from datetime import datetime, timedelta
 
-from app.util.db import get_conn
+from src.util.app_engine import create_elastic_credentials
+from src.util.db import get_conn
 from dataclasses import dataclass, asdict
 import bcrypt
-from cryptography.fernet import Fernet
+from src.util.fernet import fernet
 
 table_name = "users"
-
-
-fernet = Fernet(base64.urlsafe_b64encode(os.environ['SECRET_KEY'].encode('ascii')))
 
 
 @dataclass
@@ -18,7 +14,6 @@ class User:
     display_name: str
     email: str
     password: str = None
-    search_api_key: str = None
     password_hash: str = None
     salt: str = None
     search_api_key_hash: str = None
@@ -52,7 +47,7 @@ class User:
         return bcrypt.checkpw(password.encode('ascii'), self.password_hash)
 
     @property
-    def search_api_key_fmt(self) -> str:
+    def search_api_key(self) -> str:
         email, api_key = fernet.decrypt(self.search_api_key_hash).decode('ascii').split('::')
         if email != self.email:
             raise Exception("Invalid email")
@@ -62,7 +57,7 @@ class User:
     @property
     def document_access_token(self) -> str:
         timestamp = datetime.now() + timedelta(days=1)
-        data = f"{timestamp.timestamp()}::{self.search_api_key_fmt}"
+        data = f"{timestamp.timestamp()}::{self.search_api_key}"
         return fernet.encrypt(data.encode('ascii')).decode('ascii')
 
     @staticmethod
@@ -84,22 +79,18 @@ class User:
     def clean_dict(self):
         data = asdict(self)
 
-        # Exclude _id from the data
+        # Exclude _id from the data as we use email as the unique identifier
         data.pop('_id')
 
         # Exclude password from the data
         data.pop('password')
 
-        # Exclude search_api_key from the data
-        data.pop('search_api_key')
-
         return data
 
     def __post_init__(self):
+        if self.search_api_key_hash is None:
+            self.set_search_api_key(create_elastic_credentials(self.email))
+
         if self.password is not None:
             self.set_password_hash(self.password)
             self.password = None
-
-        if self.search_api_key is not None:
-            self.set_search_api_key(self.search_api_key)
-            self.search_api_key = None

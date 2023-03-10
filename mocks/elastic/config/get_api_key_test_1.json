@@ -1,0 +1,23 @@
+{
+  "httpRequest": {
+    "method": "GET",
+    "path": "/api/as/v1/credentials/info-example-com",
+    "headers": {
+      "Authorization": "Bearer admin-123"
+    }
+  },
+  "httpResponse": {
+    "statusCode": 200,
+    "body": {
+      "name": "info-example-com",
+      "key": "private-123",
+      "type": "private",
+      "read": true,
+      "write": false,
+      "access_all_engines": false,
+      "engines": [
+        "source-main"
+      ]
+    }
+  }
+}

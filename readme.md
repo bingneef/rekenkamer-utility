@@ -3,7 +3,7 @@
 ## Linting
 
 ```shell
-flake8 app main.py seed.py
+flake8 src main.py seed.py
 ```
 
 ## Testing

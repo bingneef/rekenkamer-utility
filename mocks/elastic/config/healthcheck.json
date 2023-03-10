@@ -1,0 +1,11 @@
+{
+  "httpRequest": {
+    "path": "/healthcheck"
+  },
+  "httpResponse": {
+    "statusCode": 200,
+    "body": {
+      "status": "OK"
+    }
+  }
+}
