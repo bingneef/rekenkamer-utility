@@ -13,5 +13,4 @@ import os
 def test_get_verification_code(email, output):
     from .auth import get_verification_code
 
-    print(get_verification_code(email))
     assert get_verification_code(email) == output, "Generated verification code correctly"

@@ -1,0 +1,40 @@
+{
+  "httpRequest": {
+    "path": "/api/as/v1/engines",
+    "headers": {
+      "Authorization": "Bearer private-123"
+    }
+  },
+  "httpResponse": {
+    "statusCode": 200,
+    "body": {
+      "meta": {
+        "page": {
+          "total_results": 4
+        }
+      },
+      "results": [
+        {
+          "name": "source-custom-test",
+          "type": "default",
+          "document_count": 123
+        },
+        {
+          "name": "source-custom-cyber",
+          "type": "default",
+          "document_count": 1234
+        },
+        {
+          "name": "source-custom-digitalisering",
+          "type": "default",
+          "document_count": 12345
+        },
+        {
+          "name": "source-main",
+          "type": "default",
+          "document_count": 123456
+        }
+      ]
+    }
+  }
+}

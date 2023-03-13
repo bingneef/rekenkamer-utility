@@ -10,10 +10,56 @@ dotenv.load_dotenv()
 DEFAULT_ENGINES = ["source-main"]
 
 
+def _app_search_admin_conn() -> AppSearch:
+    return AppSearch(
+        os.getenv("ENGINE_BASE_URL"),
+        bearer_auth=os.getenv("ENGINE_ADMIN_API_KEY")
+    )
+
+
+def _fetch_api_keys() -> list[dict]:
+    app_search = _app_search_admin_conn()
+
+    # Loop
+    results = []
+    current_page = 1
+
+    while True:
+        api_keys = app_search.list_api_keys(current_page=current_page, page_size=250)
+        results.extend(api_keys['results'])
+
+        if len(results) >= api_keys['meta']['page']['total_results']:
+            break
+
+        current_page += 1
+
+    # Only return results that have engines
+    return list(
+        filter(
+            lambda result: 'engines' in result.keys(),
+            results
+        )
+    )
+
+
+def users_for_engine(engine_name: str) -> list[str]:
+    api_keys = _fetch_api_keys()
+
+    return list(
+        map(
+            lambda api_key: _api_key_name_to_email(api_key['name']),
+            filter(
+                lambda api_key: engine_name in api_key['engines'],
+                api_keys
+            )
+        )
+    )
+
+
 def list_engines(api_key: str) -> list[str]:
     app_search = AppSearch(
         os.getenv("ENGINE_BASE_URL"),
-        http_auth=api_key
+        bearer_auth=api_key
     )
 
     return list(
@@ -26,9 +72,9 @@ def list_engines(api_key: str) -> list[str]:
 
 def verify_access(api_key: str, requested_engine: str) -> bool:
     engines = list_engines(api_key)
+
     for engine in engines:
-        # First 14 chars are source-custom, remaining is the requested engine
-        if engine[14:] == requested_engine:
+        if engine == requested_engine:
             return True
 
     return False
@@ -39,13 +85,17 @@ def _email_to_api_key_name(email: str) -> str:
     return re.sub('[^a-z0-9-]', '-', email.lower())
 
 
+def _api_key_name_to_email(api_key_name: str) -> str:
+    if api_key_name[-14:] == '-rekenkamer-nl':
+        return api_key_name[:-14].replace('-', '.').lower() + '@rekenkamer.nl'
+
+    return api_key_name
+
+
 def create_elastic_credentials(
     email: str,
 ) -> dict[str, str]:
-    app_search = AppSearch(
-        os.getenv("ENGINE_BASE_URL"),
-        bearer_auth=os.getenv("ENGINE_ADMIN_API_KEY")
-    )
+    app_search = _app_search_admin_conn()
 
     api_key_name = _email_to_api_key_name(email)
 
@@ -114,10 +164,3 @@ def update_elastic_engine_credentials(
     )
 
     return engines
-
-
-if __name__ == '__main__':
-    email_var = "b.steups@rekenkamer.nl"
-    print(create_elastic_credentials(email_var))
-    print(update_elastic_engine_credentials(email_var, engines_to_add=["source-custom-1"]))
-

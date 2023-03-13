@@ -2,7 +2,6 @@ import os
 
 from src.util.app_engine import update_elastic_engine_credentials
 from src.util.auth import get_verification_code
-from src.util.db import get_conn
 from src.util.request import get_post_body, verify_body_keys, json_abort
 from src.models.user import User
 from flask import request
@@ -50,7 +49,7 @@ def signup_route():
     user = User.find_user(email=body['email'])
     if user is not None:
         logging.info("User already exists")
-        json_abort(401, "User already exists")
+        json_abort(422, "User already exists")
 
     user = User(
         display_name=body['display_name'],

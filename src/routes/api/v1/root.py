@@ -1,4 +1,6 @@
 from flask import send_file, request, redirect, Blueprint
+
+from src.util.request import json_abort
 from src.util.s3 import get_presigned_url
 from src.models.user import User
 from src.util.zip import generate_zip_buffer, unique_custom_engines
@@ -15,8 +17,8 @@ def get_custom_document(document_path):
         api_key = User.decode_document_access_token(request.values['access_token'])
         engine = document_path.split('/')[1]
 
-        if not verify_access(api_key, engine):
-            raise Exception('No access to engine')
+        if not verify_access(api_key, f"source-custom-{engine}"):
+            json_abort(401, "No access to the engine")
 
     document_url = get_presigned_url(document_path)
 
@@ -37,8 +39,8 @@ def download_zip():
         api_key = User.decode_document_access_token(request.values['access_token'])
 
         for custom_source in custom_sources:
-            if not verify_access(api_key, custom_source):
-                raise Exception('No access to engine')
+            if not verify_access(api_key, f"source-custom-{custom_source}"):
+                json_abort(401, "No access to the engine")
 
     zip_io_buffer = generate_zip_buffer(paths, keep_folder_structure)
 
