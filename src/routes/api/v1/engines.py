@@ -30,7 +30,7 @@ def add_user_to_engine(engine):
 
     verify_or_abort(engine)
 
-    update_elastic_engine_credentials(body['email'], engines_to_add=[engine])
+    update_elastic_engine_credentials(email=body['email'], engines_to_add=[engine])
 
     return {
         'acknowledged': True
