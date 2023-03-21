@@ -16,6 +16,7 @@ class User:
     password: str = None
     password_hash: str = None
     salt: str = None
+    search_api_key_name: str = None
     search_api_key_hash: str = None
     _id: str = None
     db_conn = get_conn()
@@ -38,6 +39,14 @@ class User:
     @staticmethod
     def find_user_by_api_key_hash(search_api_key_hash: str) -> 'User':
         user = get_conn()[table_name].find_one({'search_api_key_hash': search_api_key_hash})
+        if user is None:
+            return None
+
+        return User(**user)
+
+    @staticmethod
+    def find_user_by_api_key_hash(search_api_key_name: str) -> 'User':
+        user = get_conn()[table_name].find_one({'search_api_key_name': search_api_key_name})
         if user is None:
             return None
 
@@ -68,6 +77,10 @@ class User:
 
         return api_key
 
+    @staticmethod
+    def list_users() -> list[str]:
+        return [user['email'] for user in get_conn()[table_name].find()]
+
     def persist(self):
         self.db_conn[table_name].update_one(
             {'email': self.email},
@@ -89,7 +102,9 @@ class User:
 
     def __post_init__(self):
         if self.search_api_key_hash is None:
-            self.set_search_api_key(create_elastic_credentials(self.email))
+            search_api_key, search_api_key_name = create_elastic_credentials(self.email)
+            self.set_search_api_key(search_api_key)
+            self.search_api_key_name = search_api_key_name
 
         if self.password is not None:
             self.set_password_hash(self.password)

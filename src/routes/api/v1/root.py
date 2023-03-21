@@ -1,5 +1,6 @@
 from flask import send_file, request, redirect, Blueprint
 
+from src.util.logger import logger
 from src.util.request import json_abort
 from src.util.s3 import get_presigned_url
 from src.models.user import User
@@ -11,7 +12,7 @@ api_v1_root = Blueprint('api_v1_root', __name__, url_prefix='/api/v1')
 
 @api_v1_root.route('/private-document/<path:document_path>', methods=['GET'])
 def get_custom_document(document_path):
-    print(f"Getting custom document {document_path}")
+    logger.info(f"Getting custom document {document_path}")
 
     if document_path[:14] == 'source--custom':
         api_key = User.decode_document_access_token(request.values['access_token'])

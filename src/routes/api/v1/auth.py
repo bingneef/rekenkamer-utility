@@ -2,6 +2,7 @@ import os
 
 from src.util.app_engine import update_elastic_engine_credentials
 from src.util.auth import get_verification_code
+from src.util.logger import logger
 from src.util.request import get_post_body, verify_body_keys, json_abort
 from src.models.user import User
 from flask import request
@@ -33,6 +34,7 @@ def login():
     return {
         'display_name': user.display_name,
         'search_api_key': user.search_api_key,
+        'email': user.email,
         'document_access_token': user.document_access_token
     }
 
@@ -58,29 +60,11 @@ def signup_route():
     )
     user.persist()
 
-    print(f"Created user: {user}")
+    logger.info(f"Created user: {user}")
 
     return {
         'display_name': user.display_name,
         'search_api_key': user.search_api_key,
+        'email': user.email,
         'document_access_token': user.document_access_token
-    }
-
-
-@api_v1_auth.route('/update-engine-credentials', methods=['PUT'])
-def update_engine_credentials():
-    if request.headers.get('X-Auth-Token') != os.environ['AUTH_TOKEN']:
-        json_abort(401, "Invalid auth token")
-
-    body = get_post_body(request)
-    verify_body_keys(body, ['email', 'engines_to_add', 'engines_to_remove'])
-
-    engines = update_elastic_engine_credentials(
-        email=body['email'],
-        engines_to_add=body['engines_to_add'],
-        engines_to_remove=body['engines_to_remove']
-    )
-
-    return {
-        'engines': engines
     }

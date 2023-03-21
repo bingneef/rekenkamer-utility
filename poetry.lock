@@ -388,6 +388,21 @@ trio = ["trio (>=0.14,<0.23)"]
 wmi = ["wmi (>=1.5.1,<2.0.0)"]
 
 [[package]]
+name = "ecs-logging"
+version = "2.0.0"
+description = "Logging formatters for ECS (Elastic Common Schema) in Python"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "ecs-logging-2.0.0.tar.gz", hash = "sha256:d4b791f044e8b96a4707edd4156a35fbe0e593c27ba5f05bae6b007cfab7622c"},
+    {file = "ecs_logging-2.0.0-py3-none-any.whl", hash = "sha256:8acbc164a7c14d96cb6b3b3e90e8b6972f93ddbd0215e71c6823856518f742ff"},
+]
+
+[package.extras]
+develop = ["elastic-apm", "mock", "pytest", "pytest-cov", "structlog"]
+
+[[package]]
 name = "elastic-enterprise-search"
 version = "8.4.0"
 description = "Official Python client for Elastic Enterprise Search, App Search, and Workplace Search"
@@ -1077,4 +1092,4 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "01dec89ea339e4e886be8da473c6d210ebeebab4064c700773e4fc38a6c95f5d"
+content-hash = "a67bcdd4ad2adbf26564036ec41b9d6ba7c68b6c60f3c089b401dc6b4e046697"
