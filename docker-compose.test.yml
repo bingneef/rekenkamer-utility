@@ -1,5 +1,14 @@
 version: '3.1'
 services:
+  app: # This is required for github actions to work
+    image: hello-world
+    depends_on:
+      mongo:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      mockserver_elastic_health:
+        condition: service_healthy
   minio:
     image: quay.io/minio/minio
     restart: always
