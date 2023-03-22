@@ -56,6 +56,11 @@ def signup_route():
             email=body['email'],
             password=body['password']
         )
+
+        return {
+            'toeter': True
+        }
+
         user.persist()
 
         logger.info(f"Created user: {user}")
