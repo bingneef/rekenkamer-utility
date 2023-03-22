@@ -1,6 +1,3 @@
-import os
-
-from src.util.app_engine import update_elastic_engine_credentials
 from src.util.auth import get_verification_code
 from src.util.logger import logger
 from src.util.request import get_post_body, verify_body_keys, json_abort

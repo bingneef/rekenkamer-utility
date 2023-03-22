@@ -63,4 +63,3 @@ def download_zip():
         as_attachment=True,
         download_name=filename
     )
-

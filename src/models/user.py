@@ -37,14 +37,6 @@ class User:
         return User(**user)
 
     @staticmethod
-    def find_user_by_api_key_hash(search_api_key_hash: str) -> 'User':
-        user = get_conn()[table_name].find_one({'search_api_key_hash': search_api_key_hash})
-        if user is None:
-            return None
-
-        return User(**user)
-
-    @staticmethod
     def find_user_by_api_key_hash(search_api_key_name: str) -> 'User':
         user = get_conn()[table_name].find_one({'search_api_key_name': search_api_key_name})
         if user is None:
