@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [{include = "rekenkamer_utility"}]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.11"
 bcrypt = "^4.0.1"
 flask = "^2.2.2"
 pymongo = "^4.3.3"
