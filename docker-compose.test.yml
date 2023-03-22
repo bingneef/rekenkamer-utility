@@ -1,22 +1,5 @@
 version: '3.1'
 services:
-  app:
-    build: '.'
-    env_file:
-      - ci.env
-    ports:
-      - "5000:80"
-    depends_on:
-      mockserver_elastic_health:
-        condition: service_healthy
-      minio:
-        condition: service_healthy
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:80/healthcheck" ]
-      interval: 10s
-      timeout: 10s
-      retries: 120
-
   minio:
     image: quay.io/minio/minio
     restart: always

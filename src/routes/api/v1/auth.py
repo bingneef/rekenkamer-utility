@@ -50,16 +50,11 @@ def signup_route():
         logging.info("User already exists")
         json_abort(422, "User already exists")
 
-    return {
-        'toeter': True
-    }
-
     user = User(
         display_name=body['display_name'],
         email=body['email'],
         password=body['password']
     )
-
     user.persist()
 
     logger.info(f"Created user: {user}")
