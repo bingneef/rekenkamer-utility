@@ -3,10 +3,7 @@ services:
   app:
     build: '.'
     env_file:
-      - test.env
-    environment:
-      MONGO_CONNECTION_STRING: "mongodb://mongo:mongo@mongo:27017/" # Does not have access to localhost
-      ENGINE_BASE_URL: "http://mockserver_elastic:3002" # Does not have access to localhost
+      - ci.env
     ports:
       - "5000:80"
     depends_on:

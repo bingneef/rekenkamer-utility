@@ -22,7 +22,7 @@ def test_post_init():
 def test_clean_dict():
     user = User(**default_args)
 
-    expected_keys = ['display_name', 'email', 'password_hash', 'salt', 'search_api_key_hash']
+    expected_keys = ['display_name', 'email', 'password_hash', 'salt', 'search_api_key_hash', 'search_api_key_name']
 
     assert set(user.clean_dict.keys()) == set(expected_keys), "Clean dict should only contain these keys"
 

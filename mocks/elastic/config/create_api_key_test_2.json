@@ -6,7 +6,7 @@
       "Authorization": "Bearer admin-123"
     },
     "body": {
-      "name": "noreply-example-com",
+      "name": "noreply-example-com-a6aaaaf5d124132f358752c7d72d4b44",
       "type": "private",
       "read": true,
       "write": false,
