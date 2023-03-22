@@ -38,30 +38,33 @@ def login():
 
 @api_v1_auth.route('/signup', methods=['POST'])
 def signup_route():
-    body = get_post_body(request)
-    verify_body_keys(body, ['display_name', 'email', 'password', 'verification_code'])
+    try:
+        body = get_post_body(request)
+        verify_body_keys(body, ['display_name', 'email', 'password', 'verification_code'])
 
-    if body['verification_code'] != get_verification_code(body['email']):
-        logging.info("Invalid verification code")
-        json_abort(401, "Invalid verification code")
+        if body['verification_code'] != get_verification_code(body['email']):
+            logging.info("Invalid verification code")
+            json_abort(401, "Invalid verification code")
 
-    user = User.find_user(email=body['email'])
-    if user is not None:
-        logging.info("User already exists")
-        json_abort(422, "User already exists")
+        user = User.find_user(email=body['email'])
+        if user is not None:
+            logging.info("User already exists")
+            json_abort(422, "User already exists")
 
-    user = User(
-        display_name=body['display_name'],
-        email=body['email'],
-        password=body['password']
-    )
-    user.persist()
+        user = User(
+            display_name=body['display_name'],
+            email=body['email'],
+            password=body['password']
+        )
+        user.persist()
 
-    logger.info(f"Created user: {user}")
+        logger.info(f"Created user: {user}")
 
-    return {
-        'display_name': user.display_name,
-        'search_api_key': user.search_api_key,
-        'email': user.email,
-        'document_access_token': user.document_access_token
-    }
+        return {
+            'display_name': user.display_name,
+            'search_api_key': user.search_api_key,
+            'email': user.email,
+            'document_access_token': user.document_access_token
+        }
+    except Exception as e:
+        json_abort(500, e.message)
