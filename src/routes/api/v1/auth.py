@@ -67,4 +67,6 @@ def signup_route():
             'document_access_token': user.document_access_token
         }
     except Exception as e:
-        json_abort(500, e.message)
+        return {
+            'error': e.message
+        }

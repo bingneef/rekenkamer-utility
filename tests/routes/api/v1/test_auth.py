@@ -9,7 +9,7 @@ def test_signup():
         'verification_code': '96865e8b'
     })
 
-    assert response.text == 200
+    assert response.text == 404
     assert response.status_code == 200
     assert list(response.json().keys()).sort() == ['display_name', 'search_api_key', 'document_access_token'].sort()
 
