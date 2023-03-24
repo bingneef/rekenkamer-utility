@@ -7,14 +7,22 @@ from src.routes.api.v1.root import api_v1_root
 from src.routes.root import root
 from src.util.logger import logger
 
-app = Flask(__name__)
-app.register_blueprint(root)
-app.register_blueprint(api_v1_root)
-app.register_blueprint(api_v1_auth)
-app.register_blueprint(api_v1_engines)
-app.register_blueprint(api_v1_users)
+
+# For waitress
+def create_app():
+    app = Flask(__name__)
+    app.register_blueprint(root)
+    app.register_blueprint(api_v1_root)
+    app.register_blueprint(api_v1_auth)
+    app.register_blueprint(api_v1_engines)
+    app.register_blueprint(api_v1_users)
+
+    return app
+
 
 if __name__ == "__main__":
+    app = create_app()
+
     # Print all the routes
     logger.info("Routes:")
     for rule in app.url_map.iter_rules():
