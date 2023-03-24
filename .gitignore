@@ -6,7 +6,8 @@ __pycache__
 /docker
 /data
 /tmp
-/log
+/logs
+.pytest_cache
 
 /venv/
 

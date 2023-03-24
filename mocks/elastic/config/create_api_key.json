@@ -1,0 +1,33 @@
+{
+  "httpRequest": {
+    "method": "POST",
+    "path": "/api/as/v1/credentials",
+    "headers": {
+      "Authorization": "Bearer admin-123"
+    },
+    "body": {
+      "name": "user-rekenkamer-nl",
+      "type": "private",
+      "read": true,
+      "write": false,
+      "access_all_engines": false,
+      "engines": [
+        "source-main"
+      ]
+    }
+  },
+  "httpResponse": {
+    "statusCode": 200,
+    "body": {
+      "name": "user-rekenkamer-nl",
+      "key": "private-123",
+      "type": "private",
+      "read": true,
+      "write": false,
+      "access_all_engines": false,
+      "engines": [
+        "source-main"
+      ]
+    }
+  }
+}

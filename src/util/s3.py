@@ -1,5 +1,5 @@
 import os
-from app.util.log import logging
+from src.util.log import logging
 
 from minio import Minio
 from datetime import timedelta
@@ -59,3 +59,15 @@ def get_document(path):
             response.release_conn()
 
     return doc_body
+
+
+def delete_custom_source_bucket(custom_source):
+    root_bucket_name = 'source--custom'
+
+    delete_object_list = map(
+        lambda x: x.object_name,
+        get_client().list_objects(root_bucket_name, custom_source[14:], recursive=True),
+    )
+
+    for delete_object in delete_object_list:
+        get_client().remove_object(root_bucket_name, delete_object)

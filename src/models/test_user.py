@@ -4,9 +4,9 @@ import time_machine
 from .user import User
 
 default_args = {
+    "_id": "123",
     "display_name": 'AR',
     "email": 'info@example.com',
-    "search_api_key": 'private-123',
     "password": 'testtest'
 }
 
@@ -14,7 +14,6 @@ default_args = {
 def test_post_init():
     user = User(**default_args)
     assert user.password is None, "Password should be None"
-    assert user.search_api_key is None, "SearchApiKey should be None"
 
     assert user.password_hash is not None, "Password hash should be None"
     assert user.search_api_key_hash is not None, "SearchApiKey hash should be None"
@@ -23,7 +22,7 @@ def test_post_init():
 def test_clean_dict():
     user = User(**default_args)
 
-    expected_keys = ['display_name', 'email', 'password_hash', 'salt', 'search_api_key_hash']
+    expected_keys = ['display_name', 'email', 'password_hash', 'salt', 'search_api_key_hash', 'search_api_key_name']
 
     assert set(user.clean_dict.keys()) == set(expected_keys), "Clean dict should only contain these keys"
 
@@ -41,18 +40,18 @@ def test_unique_salt():
     assert user.salt != user2.salt, "Salt should be unique"
 
 
-def test_search_api_key_fmt():
+def test_search_api_key():
     user = User(**default_args)
 
-    assert user.search_api_key_fmt == 'private-123', "SearchApiKey should be formatted correctly"
+    assert user.search_api_key == 'private-123', "SearchApiKey should be formatted correctly"
 
 
-def test_search_api_key_fmt_check_email():
+def test_search_api_key_check_email():
     user = User(**default_args)
     user.email = 'noreply@example.com'
 
     with pytest.raises(Exception):
-        user.search_api_key_fmt
+        user.search_api_key
 
 
 def test_document_access_token():

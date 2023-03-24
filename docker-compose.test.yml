@@ -1,0 +1,63 @@
+version: '3.1'
+services:
+  app: # This is required for github actions to work
+    image: hello-world
+    depends_on:
+      mongo:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      mockserver_elastic_health:
+        condition: service_healthy
+  minio:
+    image: quay.io/minio/minio
+    restart: always
+    command: server /data --console-address ":9001"
+    expose:
+      - "9000"
+      - "9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 10s
+      timeout: 3s
+      retries: 30
+
+  mongo:
+    image: mongo
+    restart: always
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | /bin/mongosh mongo:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 60
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongo
+      MONGO_INITDB_ROOT_PASSWORD: mongo
+
+  mockserver_elastic:
+    image: mockserver/mockserver:5.14.0
+    ports:
+      - "3002:1080"
+    environment:
+      MOCKSERVER_INITIALIZATION_JSON_PATH: /config/*.json
+    volumes:
+      - ./mocks/elastic/config:/config
+
+  mockserver_elastic_health:
+    image: curlimages/curl:7.78.0
+    depends_on:
+      - mockserver_elastic
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://mockserver_elastic:1080/healthcheck" ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+    entrypoint: [ "tail", "-f", "/dev/null" ]

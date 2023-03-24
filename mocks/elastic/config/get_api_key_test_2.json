@@ -1,0 +1,23 @@
+{
+  "httpRequest": {
+    "method": "GET",
+    "path": "/api/as/v1/credentials/noreply-example-com-a6aaaaf5d124132f358752c7d72d4b44",
+    "headers": {
+      "Authorization": "Bearer admin-123"
+    }
+  },
+  "httpResponse": {
+    "statusCode": 200,
+    "body": {
+      "name": "noreply-example-com-a6aaaaf5d124132f358752c7d72d4b44",
+      "key": "private-123",
+      "type": "private",
+      "read": true,
+      "write": false,
+      "access_all_engines": false,
+      "engines": [
+        "source-main"
+      ]
+    }
+  }
+}
