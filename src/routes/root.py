@@ -1,6 +1,3 @@
-import os
-
-import requests
 from flask import send_file, request, redirect, Blueprint
 
 from src.util.db import get_conn
