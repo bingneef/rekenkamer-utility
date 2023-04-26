@@ -13,6 +13,13 @@ dotenv.load_dotenv()
 DEFAULT_ENGINES = ["source-main"]
 
 
+def _app_search_get_conn(search_api_key) -> AppSearch:
+    return AppSearch(
+        os.getenv("ENGINE_BASE_URL"),
+        bearer_auth=f"private-{search_api_key}"
+    )
+
+
 def _app_search_admin_conn() -> AppSearch:
     return AppSearch(
         os.getenv("ENGINE_BASE_URL"),
@@ -66,6 +73,31 @@ def users_for_engine(engine_name: str) -> list[str]:
     )
 
 
+def verify_format_and_uniqueness_name(engine_name: str) -> bool:
+    app_search = _app_search_private_conn()
+    # Check format is ok
+    if not re.match(r'^[a-z0-9-]+$', engine_name):
+        return False, 'Engine name must only contain lowercase letters, numbers and dashes'
+
+    if "--" in engine_name or engine_name[-1] == '-':
+        return False, 'Engine name cannot start or end with a dash or contain consecutive dashes'
+
+    try:
+        app_search.get_engine(engine_name=engine_name)
+        return False, 'Engine name already exists'
+    except elastic_enterprise_search.exceptions.NotFoundError:
+        return True, 'ok'
+
+
+def remove_documents(api_key: str, engine: str, ids: list[str]):
+    app_search = AppSearch(
+        os.getenv("ENGINE_BASE_URL"),
+        bearer_auth=api_key
+    )
+
+    return app_search.delete_documents(engine_name=engine, document_ids=ids)
+
+
 def list_engines(api_key: str) -> list[str]:
     app_search = AppSearch(
         os.getenv("ENGINE_BASE_URL"),
@@ -102,7 +134,7 @@ def _email_to_api_key_name(email: str) -> str:
 def _api_key_name_to_email(api_key_name: str) -> str:
     from src.models.user import User
 
-    user = User.find_user_by_api_key_hash(api_key_name)
+    user = User.find_user_by_api_key_name(api_key_name)
     if user is None:
         return api_key_name
 
@@ -145,7 +177,7 @@ def create_elastic_credentials(
         name=api_key_name,
         type="private",
         read=True,
-        write=False,
+        write=True,
         access_all_engines=False,
         engines=DEFAULT_ENGINES
     )
@@ -160,7 +192,7 @@ def create_engine(engine, user_email):
     app_search = _app_search_private_conn()
     app_search.create_engine(
         engine_name=engine,
-        language="en",
+        language=None,
         type='default'
     )
 
@@ -215,8 +247,8 @@ def update_elastic_engine_credentials(
     return engines
 
 
-def delete_engine(engine):
-    app_search = _app_search_private_conn()
+def delete_engine(engine, search_api_key):
+    app_search = _app_search_get_conn(search_api_key)
     app_search.delete_engine(
         engine_name=engine
     )

@@ -1,10 +1,11 @@
+import base64
 from datetime import datetime, timedelta
-
 from src.util.app_engine import create_elastic_credentials
 from src.util.db import get_conn
 from dataclasses import dataclass, asdict
 import bcrypt
 from src.util.fernet import fernet
+from bson import binary
 
 table_name = "users"
 
@@ -37,7 +38,7 @@ class User:
         return User(**user)
 
     @staticmethod
-    def find_user_by_api_key_hash(search_api_key_name: str) -> 'User':
+    def find_user_by_api_key_name(search_api_key_name: str) -> 'User':
         user = get_conn()[table_name].find_one({'search_api_key_name': search_api_key_name})
         if user is None:
             return None
@@ -91,6 +92,13 @@ class User:
         data.pop('password')
 
         return data
+
+    @property
+    def api_values(self):
+        return {
+            'display_name': self.display_name,
+            'email': self.email,
+        }
 
     def __post_init__(self):
         if self.search_api_key_hash is None:

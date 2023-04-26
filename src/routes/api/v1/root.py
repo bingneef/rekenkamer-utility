@@ -1,8 +1,10 @@
+from hashlib import md5
+
 from flask import send_file, request, redirect, Blueprint
 
 from src.util.logger import logger
 from src.util.request import json_abort
-from src.util.s3 import get_presigned_url
+from src.util.s3 import get_presigned_url, store_buffer_in_s3
 from src.models.user import User
 from src.util.zip import generate_zip_buffer, unique_custom_engines
 from src.util.app_engine import verify_access
@@ -28,26 +30,24 @@ def get_custom_document(document_path):
 
 @api_v1_root.route('/zip', methods=['POST'])
 def download_zip():
-    paths = request.form.getlist('document_paths[]')
-    keep_folder_structure = int(request.form.get('keep_folder_structure', 0)) == 1
-    filename = request.form.get('filename', 'results.zip')
-
-    if filename[-4:] != '.zip':
-        filename = f"{filename}.zip"
+    paths = request.form.getlist('document_paths')
+    if len(paths) == 0:
+        paths = request.json['document_paths']
 
     custom_sources = unique_custom_engines(paths)
     if len(custom_sources) > 0:
-        api_key = User.decode_document_access_token(request.values['access_token'])
+        api_key = request.headers.get('X-Api-Key')
 
         for custom_source in custom_sources:
             if not verify_access(api_key, f"source-custom-{custom_source}"):
                 json_abort(401, "No access to the engine")
 
-    zip_io_buffer = generate_zip_buffer(paths, keep_folder_structure)
+    zip_io_buffer = generate_zip_buffer(paths)
+    md5sum = md5(zip_io_buffer.getbuffer())
 
-    return send_file(
-        zip_io_buffer,
-        mimetype='application/zip',
-        as_attachment=True,
-        download_name=filename
-    )
+    path = store_buffer_in_s3(zip_io_buffer, bucket_name='private-artifacts', file_path=f"zip/{md5sum.hexdigest()}.zip")
+    url = get_presigned_url(path)
+
+    return {
+        "link": url
+    }

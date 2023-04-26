@@ -44,8 +44,12 @@ def create_engine_for_user():
 def remove_engine_route(engine):
     verify_or_abort(engine)
 
-    delete_engine(engine)
+    api_search_key = request.headers.get('X-Api-Key')
+
+    # TODO: delete all documents in correct order
+    # delete_document_sources(engine)
     delete_custom_source_bucket(engine)
+    delete_engine(engine, api_search_key)
 
     return {'acknowledged': True}
 
