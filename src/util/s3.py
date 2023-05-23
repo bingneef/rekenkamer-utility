@@ -1,15 +1,14 @@
 import os
-import sys
 
 from src.util.log import logging
 
 from minio import Minio
 from datetime import timedelta
 
-MINIO_HOST = os.getenv('MINIO_HOST', "localhost:9000")
-MINIO_ACCESS_KEY = os.getenv('MINIO_ACCESS_KEY', "airflow")
-MINIO_SECRET_KEY = os.getenv('MINIO_SECRET_KEY', "airflow1")
-MINIO_SECURE = os.getenv('MINIO_SECURE', 0)
+MINIO_HOST = os.getenv("MINIO_HOST", "localhost:9000")
+MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "airflow")
+MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "airflow1")
+MINIO_SECURE = os.getenv("MINIO_SECURE", 0)
 
 
 def get_client():
@@ -17,24 +16,19 @@ def get_client():
         MINIO_HOST,
         access_key=MINIO_ACCESS_KEY,
         secret_key=MINIO_SECRET_KEY,
-        secure=MINIO_SECURE == 1
+        secure=MINIO_SECURE == 1,
     )
 
 
 def get_presigned_url(path):
     client = get_client()
-    bucket_name = path.split('/')[0]
-    object_name = "/".join(path.split('/')[1:])
+    bucket_name = path.split("/")[0]
+    object_name = "/".join(path.split("/")[1:])
 
     # Make the link 1 minute valid
     expires = timedelta(minutes=1)
 
-    url = client.get_presigned_url(
-        "GET",
-        bucket_name,
-        object_name,
-        expires=expires
-    )
+    url = client.get_presigned_url("GET", bucket_name, object_name, expires=expires)
 
     return url
 
@@ -42,14 +36,14 @@ def get_presigned_url(path):
 def list_documents(path):
     client = get_client()
 
-    bucket_name = path.split('/')[0]
-    prefix = path.split('/')[1]
+    bucket_name = path.split("/")[0]
+    prefix = path.split("/")[1]
 
-    logging.info(f"Retrieving - path: {path}, bucket_name: {bucket_name}, prefix: {prefix}")
+    logging.info(
+        f"Retrieving - path: {path}, bucket_name: {bucket_name}, prefix: {prefix}"
+    )
     documents = client.list_objects(
-        bucket_name=bucket_name,
-        prefix=prefix,
-        recursive=True
+        bucket_name=bucket_name, prefix=prefix, recursive=True
     )
 
     def map_document(document):
@@ -57,8 +51,7 @@ def list_documents(path):
             "size": document.size,
             "filename": document.object_name.replace(f"{prefix}/", ""),
             "last_modified": document.last_modified,
-            "url": f"source--custom/{document.object_name}"
-
+            "url": f"source--custom/{document.object_name}",
         }
 
     def filter_documents(document):
@@ -69,12 +62,10 @@ def list_documents(path):
 
         return True
 
-    data = list(
-        map(map_document, filter(filter_documents, documents))
-    )
+    data = list(map(map_document, filter(filter_documents, documents)))
 
     # Sort on filename
-    data.sort(key=lambda x: x['filename'])
+    data.sort(key=lambda x: x["filename"])
 
     return data
 
@@ -83,15 +74,14 @@ def get_document(path):
     client = get_client()
     response = None
 
-    bucket_name = path.split('/')[0]
-    object_name = "/".join(path.split('/')[1:])
+    bucket_name = path.split("/")[0]
+    object_name = "/".join(path.split("/")[1:])
 
-    logging.info(f"Retrieving - path: {path}, bucket_name: {bucket_name}, object_name: {object_name}")
+    logging.info(
+        f"Retrieving - path: {path}, bucket_name: {bucket_name}, object_name: {object_name}"
+    )
     try:
-        response = client.get_object(
-            bucket_name=bucket_name,
-            object_name=object_name
-        )
+        response = client.get_object(bucket_name=bucket_name, object_name=object_name)
         doc_body = response.data
     finally:
         if response is not None:
@@ -114,20 +104,18 @@ def store_buffer_in_s3(buffer, bucket_name, file_path):
         bucket_name=bucket_name,
         object_name=file_path,
         data=buffer,
-        length=buffer.getbuffer().nbytes
+        length=buffer.getbuffer().nbytes,
     )
 
     return f"private-artifacts/{file_path}"
 
 
 def delete_document(bucket, file_path):
-    return get_client().remove_object(
-        bucket, file_path
-    )
+    return get_client().remove_object(bucket, file_path)
 
 
 def delete_custom_source_bucket(custom_source):
-    root_bucket_name = 'source--custom'
+    root_bucket_name = "source--custom"
 
     delete_object_list = map(
         lambda x: x.object_name,

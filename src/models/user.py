@@ -1,11 +1,9 @@
-import base64
 from datetime import datetime, timedelta
 from src.util.app_engine import create_elastic_credentials
 from src.util.db import get_conn
 from dataclasses import dataclass, asdict
 import bcrypt
 from src.util.fernet import fernet
-from bson import binary
 
 table_name = "users"
 
@@ -24,33 +22,39 @@ class User:
 
     def set_password_hash(self, password: str):
         self.salt = bcrypt.gensalt()
-        self.password_hash = bcrypt.hashpw(password.encode('ascii'), self.salt)
+        self.password_hash = bcrypt.hashpw(password.encode("ascii"), self.salt)
 
     def set_search_api_key(self, search_api_key: str):
-        self.search_api_key_hash = fernet.encrypt(f"{self.email}::{search_api_key}".encode('ascii'))
+        self.search_api_key_hash = fernet.encrypt(
+            f"{self.email}::{search_api_key}".encode("ascii")
+        )
 
     @staticmethod
-    def find_user(email: str) -> 'User':
-        user = get_conn()[table_name].find_one({'email': email})
+    def find_user(email: str) -> "User":
+        user = get_conn()[table_name].find_one({"email": email})
         if user is None:
             return None
 
         return User(**user)
 
     @staticmethod
-    def find_user_by_api_key_name(search_api_key_name: str) -> 'User':
-        user = get_conn()[table_name].find_one({'search_api_key_name': search_api_key_name})
+    def find_user_by_api_key_name(search_api_key_name: str) -> "User":
+        user = get_conn()[table_name].find_one(
+            {"search_api_key_name": search_api_key_name}
+        )
         if user is None:
             return None
 
         return User(**user)
 
     def verify_password(self, password: str) -> bool:
-        return bcrypt.checkpw(password.encode('ascii'), self.password_hash)
+        return bcrypt.checkpw(password.encode("ascii"), self.password_hash)
 
     @property
     def search_api_key(self) -> str:
-        email, api_key = fernet.decrypt(self.search_api_key_hash).decode('ascii').split('::')
+        email, api_key = (
+            fernet.decrypt(self.search_api_key_hash).decode("ascii").split("::")
+        )
         if email != self.email:
             raise Exception("Invalid email")
 
@@ -60,11 +64,13 @@ class User:
     def document_access_token(self) -> str:
         timestamp = datetime.now() + timedelta(days=1)
         data = f"{timestamp.timestamp()}::{self.search_api_key}"
-        return fernet.encrypt(data.encode('ascii')).decode('ascii')
+        return fernet.encrypt(data.encode("ascii")).decode("ascii")
 
     @staticmethod
     def decode_document_access_token(token: str) -> str:
-        timestamp, api_key = fernet.decrypt(token.encode('ascii')).decode('ascii').split('::')
+        timestamp, api_key = (
+            fernet.decrypt(token.encode("ascii")).decode("ascii").split("::")
+        )
         if datetime.fromtimestamp(float(timestamp)) < datetime.now():
             raise Exception("Token expired")
 
@@ -72,13 +78,11 @@ class User:
 
     @staticmethod
     def list_users() -> list[str]:
-        return [user['email'] for user in get_conn()[table_name].find()]
+        return [user["email"] for user in get_conn()[table_name].find()]
 
     def persist(self):
         self.db_conn[table_name].update_one(
-            {'email': self.email},
-            {'$set': self.clean_dict},
-            upsert=True
+            {"email": self.email}, {"$set": self.clean_dict}, upsert=True
         )
 
     @property
@@ -86,18 +90,18 @@ class User:
         data = asdict(self)
 
         # Exclude _id from the data as we use email as the unique identifier
-        data.pop('_id')
+        data.pop("_id")
 
         # Exclude password from the data
-        data.pop('password')
+        data.pop("password")
 
         return data
 
     @property
     def api_values(self):
         return {
-            'display_name': self.display_name,
-            'email': self.email,
+            "display_name": self.display_name,
+            "email": self.email,
         }
 
     def __post_init__(self):
