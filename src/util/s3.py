@@ -11,6 +11,13 @@ MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "airflow1")
 MINIO_SECURE = os.getenv("MINIO_SECURE", 0)
 
 
+def check_or_create_bucket(bucket_name):
+    client = get_client()
+
+    if not client.bucket_exists(bucket_name):
+        client.make_bucket(bucket_name)
+
+
 def get_client():
     return Minio(
         MINIO_HOST,
@@ -100,6 +107,8 @@ def base64_to_buffer(content: str):
 
 
 def store_buffer_in_s3(buffer, bucket_name, file_path):
+    check_or_create_bucket(bucket_name)
+
     get_client().put_object(
         bucket_name=bucket_name,
         object_name=file_path,

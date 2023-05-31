@@ -95,7 +95,7 @@ def get_source_documents(source_key):
         json_abort(401, "No access to the engine")
 
     logger.info(f"Getting documents for {source_key}")
-    return {"documents": source.list_documents()}
+    return source.list_documents()
 
 
 @api_v1_sources.route("/<source_key>/documents", methods=["POST"])

@@ -82,7 +82,7 @@ def get_source_status(source: str) -> bool:
 
     job = jobs[0]
     if job["state"] == "running" or job["state"] == "queued":
-        return "RUNNING"
+        return "IN_PROGRESS"
 
     if job["state"] == "success":
         return "DONE"
