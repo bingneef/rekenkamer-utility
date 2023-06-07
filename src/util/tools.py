@@ -1,7 +1,8 @@
 import hashlib
+from typing import Any, Callable
 
 
-def partition(pred, iterable):
+def partition(pred: Callable[[Any], bool], iterable: list[Any]):
     trues = []
     falses = []
     for item in iterable:
