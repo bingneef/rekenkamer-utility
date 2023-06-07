@@ -36,7 +36,6 @@ def download_zip():
         paths = request.json["document_paths"]
 
     custom_sources = Source.unique_custom_engines(paths)
-    custom_sources = []
     if len(custom_sources) > 0:
         api_key = request.headers.get("X-Api-Key")
 
