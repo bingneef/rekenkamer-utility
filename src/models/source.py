@@ -24,6 +24,15 @@ class Source:
     end_date: str = None
 
     @staticmethod
+    def unique_custom_engines(paths: list[str]) -> list[str]:
+        custom_engines = set()
+        for path in paths:
+            if path[:14] == "source--custom":
+                custom_engines.add(path.split("/")[1])
+
+        return list(custom_engines)
+
+    @staticmethod
     def list_sources() -> list["Source"]:
         sources = get_conn_sources()[table_name].aggregate(
             [

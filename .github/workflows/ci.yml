@@ -23,10 +23,15 @@ jobs:
           python -m pip install poetry
           poetry export --format requirements.txt --with dev > requirements.txt
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Format with black
+        run: |
+          # stop the build if there are Python syntax errors or undefined names
+          black src main.py seed.py --check --diff
       - name: Lint with flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names
           flake8 src main.py seed.py --count --show-source --statistics
+
       - name: Test with pytest
         run: |
           docker-compose -f docker-compose.test.yml up -d

@@ -6,4 +6,4 @@ import dotenv
 dotenv.load_dotenv()
 
 
-fernet = Fernet(base64.urlsafe_b64encode(os.environ['SECRET_KEY'].encode('ascii')))
+fernet = Fernet(base64.urlsafe_b64encode(os.environ["SECRET_KEY"].encode("ascii")))
