@@ -10,7 +10,7 @@ def get_conn():
     client = pymongo.MongoClient(os.environ["MONGO_CONNECTION_STRING"])  # type: ignore
 
     db_name = os.environ.get("MONGO_DB", "auth")
-    if os.environ["ENV"] == "test":
+    if os.environ.get("ENV", "production") == "test":
         db_name = "test_auth"
 
     db_conn = client[db_name]
@@ -22,7 +22,7 @@ def get_conn_sources():
     client = pymongo.MongoClient(os.environ["MONGO_CONNECTION_STRING"])  # type: ignore
 
     db_name = os.environ.get("MONGO_DB_SOURCES", "sources")
-    if os.environ["ENV"] == "test":
+    if os.environ.get("ENV", "production") == "test":
         db_name = "test_sources"
 
     db_conn = client[db_name]
@@ -31,7 +31,7 @@ def get_conn_sources():
 
 
 def drop_db():
-    if os.environ["ENV"] != "test":
+    if os.environ.get("ENV", "production") != "test":
         raise Exception("You can only drop the test database")
 
     client = pymongo.MongoClient(os.environ["MONGO_CONNECTION_STRING"])  # type: ignore
