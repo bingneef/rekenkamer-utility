@@ -2,7 +2,7 @@ from flask import abort, jsonify
 
 
 def json_abort(code, message):
-    response = jsonify({'code': code, 'message': message})
+    response = jsonify({"code": code, "message": message})
 
     response.status_code = code
     abort(response)

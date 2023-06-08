@@ -8,16 +8,16 @@ import logging
 
 from flask import Blueprint
 
-api_v1_auth = Blueprint('api_v1_auth', __name__, url_prefix='/api/v1/auth')
+api_v1_auth = Blueprint("api_v1_auth", __name__, url_prefix="/api/v1/auth")
 
 
-@api_v1_auth.route('/login', methods=['POST'])
+@api_v1_auth.route("/login", methods=["POST"])
 def login():
     body = get_post_body(request)
-    verify_body_keys(body, ['email', 'password'])
+    verify_body_keys(body, ["email", "password"])
 
-    email = body['email']
-    password = body['password']
+    email = body["email"]
+    password = body["password"]
 
     user = User.find_user(email)
     if user is None:
@@ -29,31 +29,31 @@ def login():
         json_abort(401, "Invalid credentials")
 
     return {
-        'display_name': user.display_name,
-        'search_api_key': user.search_api_key,
-        'email': user.email,
-        'document_access_token': user.document_access_token
+        "display_name": user.display_name,
+        "search_api_key": user.search_api_key,
+        "email": user.email,
+        "document_access_token": user.document_access_token,
     }
 
 
-@api_v1_auth.route('/signup', methods=['POST'])
+@api_v1_auth.route("/signup", methods=["POST"])
 def signup_route():
     body = get_post_body(request)
-    verify_body_keys(body, ['display_name', 'email', 'password', 'verification_code'])
+    verify_body_keys(body, ["display_name", "email", "password", "verification_code"])
 
-    if body['verification_code'] != get_verification_code(body['email']):
+    if body["verification_code"] != get_verification_code(body["email"]):
         logging.info("Invalid verification code")
         json_abort(401, "Invalid verification code")
 
-    user = User.find_user(email=body['email'])
+    user = User.find_user(email=body["email"])
     if user is not None:
         logging.info("User already exists")
         json_abort(422, "User already exists")
 
     user = User(
-        display_name=body['display_name'],
-        email=body['email'],
-        password=body['password']
+        display_name=body["display_name"],
+        email=body["email"],
+        password=body["password"],
     )
 
     user.persist()
@@ -61,8 +61,8 @@ def signup_route():
     logger.info(f"Created user: {user}")
 
     return {
-        'display_name': user.display_name,
-        'search_api_key': user.search_api_key,
-        'email': user.email,
-        'document_access_token': user.document_access_token
+        "display_name": user.display_name,
+        "search_api_key": user.search_api_key,
+        "email": user.email,
+        "document_access_token": user.document_access_token,
     }

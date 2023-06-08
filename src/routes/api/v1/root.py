@@ -1,12 +1,13 @@
 from hashlib import md5
 
 from flask import request, redirect, Blueprint
+from src.models.source import Source
 
 from src.util.logger import logger
 from src.util.request import json_abort
 from src.util.s3 import get_presigned_url, store_buffer_in_s3
 from src.models.user import User
-from src.util.zip import generate_zip_buffer, unique_custom_engines
+from src.util.zip import generate_zip_buffer
 from src.util.app_engine import verify_access
 
 api_v1_root = Blueprint("api_v1_root", __name__, url_prefix="/api/v1")
@@ -34,7 +35,8 @@ def download_zip():
     if len(paths) == 0:
         paths = request.json["document_paths"]
 
-    custom_sources = unique_custom_engines(paths)
+    logger.info(f"Getting zip for {paths}")
+    custom_sources = Source.unique_custom_engines(paths)
     if len(custom_sources) > 0:
         api_key = request.headers.get("X-Api-Key")
 

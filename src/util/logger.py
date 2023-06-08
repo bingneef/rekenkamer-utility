@@ -10,8 +10,8 @@ handler = logging.StreamHandler()
 logger.addHandler(handler)
 
 # Add an ECS formatter to the Handler
-fileHandler = logging.FileHandler('logs/utility.app.json')
+fileHandler = logging.FileHandler("logs/utility.app.json")
 fileHandler.setFormatter(
-    ecs_logging.StdlibFormatter(extra={'event.dataset': 'Utility'})
+    ecs_logging.StdlibFormatter(extra={"event.dataset": "Utility"})
 )
 logger.addHandler(fileHandler)
