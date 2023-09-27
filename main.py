@@ -1,3 +1,4 @@
+import os
 from flask import Flask
 
 from src.routes.api.v1.auth import api_v1_auth
@@ -33,4 +34,4 @@ if __name__ == "__main__":
         logger.info(rule)
 
     # Only for debugging while developing
-    app.run(host="0.0.0.0", debug=True, port=5000)
+    app.run(host="0.0.0.0", debug=True, port=os.getenv("PORT", 5000))

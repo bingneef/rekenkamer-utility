@@ -60,7 +60,8 @@ class Source:
 
     @staticmethod
     def get_source(source_key: str, fallback=False, check_status=False) -> "Source":
-        source_match = {"source": source_key}
+        # Use regex to allow for bulk keys
+        source_match = {"source": {"$regex": source_key}}
         if source_key[:14] == "source-custom-":
             source_match = {"source": "custom", "meta.sub_source": source_key[14:]}
 
@@ -123,13 +124,21 @@ class Source:
                 status = get_source_status(source_key)
 
         start_date_doc = get_conn_sources()[table_name].find_one(
-            {**source_match, "stored": True}, sort=[("date", 1)]
+            {**source_match, "stored": True}, sort=[("published_at", 1)]
         )
         end_date_doc = get_conn_sources()[table_name].find_one(
-            {**source_match, "stored": True}, sort=[("date", -1)]
+            {**source_match, "stored": True}, sort=[("published_at", -1)]
         )
-        start_date = start_date_doc["date"] if start_date_doc is not None else None
-        end_date = end_date_doc["date"] if end_date_doc is not None else None
+        start_date = (
+            start_date_doc["published_at"].strftime("%Y-%m-%d")
+            if start_date_doc is not None
+            else None
+        )
+        end_date = (
+            end_date_doc["published_at"].strftime("%Y-%m-%d")
+            if end_date_doc is not None
+            else None
+        )
 
         return Source(
             key=source_key,

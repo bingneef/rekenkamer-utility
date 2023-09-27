@@ -1,3 +1,4 @@
+from src.errors.translation import translate_error
 from src.models.source import Source
 from src.models.user import User
 from src.util.airflow import create_custom_source_job
@@ -38,7 +39,8 @@ def create_source():
 
     success, message = verify_format_and_uniqueness_name(engine_name=engine_name)
     if not success:
-        json_abort(422, message)
+        logger.info(f"Creating custom source failed: {message}")
+        json_abort(422, translate_error(message))
 
     user = User.find_user(email=body["email"])
 
@@ -63,6 +65,10 @@ def get_source(source_key):
         source = Source.get_source(source_key, fallback=True, check_status=True)
     else:
         source = Source.get_source(source_key, check_status=True)
+        # Check if it's a bulk_key
+        if source is None:
+            source = Source.get_source(f"source_key__*", check_status=True)
+
         if source is None:
             json_abort(404, "Source not found")
 

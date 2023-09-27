@@ -66,26 +66,28 @@ def users_for_engine(engine_name: str) -> list[str]:
     ]
 
 
-def verify_format_and_uniqueness_name(engine_name: str) -> bool:
+def verify_format_and_uniqueness_name(engine_name: str) -> tuple[bool, str]:
     app_search = _app_search_private_conn()
     # Check format is ok
     if not re.match(r"^[a-z0-9-]+$", engine_name):
         return (
             False,
-            "Engine name must only contain lowercase letters, numbers and dashes",
+            "ENGINE_FORMAT_ERROR",
         )
 
     if "--" in engine_name or engine_name[-1] == "-":
         return (
             False,
-            "Engine name cannot start or end with a dash or contain consecutive dashes",
+            "ENGINE_FORMAT_DASH_ERROR",
         )
 
     try:
         app_search.get_engine(engine_name=engine_name)
-        return False, "Engine name already exists"
+        return False, "ENGINE_ALREADY_EXISTS"
     except elastic_enterprise_search.exceptions.NotFoundError:
         return True, "ok"
+    except elastic_enterprise_search.exceptions.InternalServerError:
+        return False, "ENGINE_UNKNOWN_ERROR"
 
 
 def remove_documents(api_key: str, engine: str, ids: list[str]):
