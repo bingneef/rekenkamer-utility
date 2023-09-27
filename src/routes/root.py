@@ -1,7 +1,7 @@
 from flask import send_file, request, redirect, Blueprint
 from src.models.source import Source
 
-from src.util.db import get_conn
+from src.util.db import get_conn_auth
 from src.util.logger import logger
 from src.util.request import json_abort
 from src.util.s3 import get_presigned_url
@@ -20,7 +20,7 @@ def landing():
 @root.route("/healthcheck")
 def healthcheck():
     # Verify DB is working
-    get_conn()["users"].find({}).limit(1)
+    get_conn_auth()["users"].find({}).limit(1)
 
     return {"status": "ok"}
 

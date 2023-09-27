@@ -14,7 +14,7 @@ dotenv.load_dotenv()
 DEFAULT_ENGINES = ["source-main"]
 
 
-def _app_search_get_conn(search_api_key) -> AppSearch:
+def _app_search_get_conn_auth(search_api_key) -> AppSearch:
     return AppSearch(
         os.getenv("ENGINE_BASE_URL"), bearer_auth=f"private-{search_api_key}"
     )
@@ -234,7 +234,7 @@ def update_elastic_engine_credentials(
 
 
 def delete_engine(engine, search_api_key):
-    app_search = _app_search_get_conn(search_api_key)
+    app_search = _app_search_get_conn_auth(search_api_key)
     app_search.delete_engine(engine_name=engine)
 
     return True

@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from src.util.app_engine import create_elastic_credentials
-from src.util.db import get_conn
+from src.util.db import get_conn_auth
 from dataclasses import dataclass, asdict
 import bcrypt
 from src.util.fernet import fernet
@@ -18,7 +18,7 @@ class User:
     search_api_key_name: str = None
     search_api_key_hash: str = None
     _id: str = None
-    db_conn = get_conn()
+    db_conn = get_conn_auth()
 
     def set_password_hash(self, password: str):
         self.salt = bcrypt.gensalt()
@@ -31,7 +31,7 @@ class User:
 
     @staticmethod
     def find_user(email: str) -> "User":
-        user = get_conn()[table_name].find_one({"email": email})
+        user = get_conn_auth()[table_name].find_one({"email": email})
         if user is None:
             return None
 
@@ -39,7 +39,7 @@ class User:
 
     @staticmethod
     def find_user_by_api_key_name(search_api_key_name: str) -> "User":
-        user = get_conn()[table_name].find_one(
+        user = get_conn_auth()[table_name].find_one(
             {"search_api_key_name": search_api_key_name}
         )
         if user is None:
@@ -78,7 +78,7 @@ class User:
 
     @staticmethod
     def list_users() -> list[str]:
-        return [user["email"] for user in get_conn()[table_name].find()]
+        return [user["email"] for user in get_conn_auth()[table_name].find()]
 
     def persist(self):
         self.db_conn[table_name].update_one(
