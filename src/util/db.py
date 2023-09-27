@@ -34,10 +34,10 @@ def drop_db():
     if os.environ.get("ENV", "production") != "test":
         raise Exception("You can only drop the test database")
 
-    client = pymongo.MongoClient(os.environ["MONGO_CONNECTION_STRING"])  # type: ignore
-
     # Drop auth
+    client = pymongo.MongoClient(os.environ["MONGO_CONNECTION_STRING_AUTH"])  # type: ignore
     client.drop_database("test_auth")
 
     # Drop sources
+    client = pymongo.MongoClient(os.environ["MONGO_CONNECTION_STRING_SOURCES"])  # type: ignore
     client.drop_database("test_sources")
