@@ -65,9 +65,6 @@ def get_source(source_key):
         source = Source.get_source(source_key, fallback=True, check_status=True)
     else:
         source = Source.get_source(source_key, check_status=True)
-        # Check if it's a bulk_key
-        if source is None:
-            source = Source.get_source(f"source_key__*", check_status=True)
 
         if source is None:
             json_abort(404, "Source not found")
