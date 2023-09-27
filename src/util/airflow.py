@@ -5,7 +5,7 @@ import requests
 from src.util.logger import logger
 import os
 
-AIRFLOW_BASE_URL = os.environ["AIRFLOW_HOST"]
+AIRFLOW_BASE_URL = os.environ["AIRFLOW_BASE_URL"]
 AIRFLOW_USERNAME = os.environ["AIRFLOW_USERNAME"]
 AIRFLOW_PASSWORD = os.environ["AIRFLOW_PASSWORD"]
 
