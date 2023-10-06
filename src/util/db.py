@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-def get_conn():
-    client = pymongo.MongoClient(os.environ["MONGO_CONNECTION_STRING"])  # type: ignore
+def get_conn_auth():
+    client = pymongo.MongoClient(os.environ["MONGO_CONNECTION_STRING_AUTH"])  # type: ignore
 
     db_name = os.environ.get("MONGO_DB", "auth")
     if os.environ.get("ENV", "production") == "test":
@@ -19,7 +19,7 @@ def get_conn():
 
 
 def get_conn_sources():
-    client = pymongo.MongoClient(os.environ["MONGO_CONNECTION_STRING"])  # type: ignore
+    client = pymongo.MongoClient(os.environ["MONGO_CONNECTION_STRING_SOURCES"])  # type: ignore
 
     db_name = os.environ.get("MONGO_DB_SOURCES", "sources")
     if os.environ.get("ENV", "production") == "test":
@@ -34,10 +34,10 @@ def drop_db():
     if os.environ.get("ENV", "production") != "test":
         raise Exception("You can only drop the test database")
 
-    client = pymongo.MongoClient(os.environ["MONGO_CONNECTION_STRING"])  # type: ignore
-
     # Drop auth
+    client = pymongo.MongoClient(os.environ["MONGO_CONNECTION_STRING_AUTH"])  # type: ignore
     client.drop_database("test_auth")
 
     # Drop sources
+    client = pymongo.MongoClient(os.environ["MONGO_CONNECTION_STRING_SOURCES"])  # type: ignore
     client.drop_database("test_sources")
