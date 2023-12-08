@@ -20,7 +20,7 @@ def _app_search_user_conn(search_api_key) -> AppSearch:
     )
 
 
-def _app_search_conn() -> AppSearch:
+def _app_search_admin_conn() -> AppSearch:
     return AppSearch(
         os.getenv("ENGINE_BASE_URL"),
         basic_auth=os.getenv("ENTERPRISE_SEARCH_BASIC_AUTH"),
@@ -28,7 +28,7 @@ def _app_search_conn() -> AppSearch:
 
 
 def _fetch_api_keys() -> list[dict]:
-    app_search = _app_search_conn()
+    app_search = _app_search_admin_conn()
 
     # Loop
     results = []
@@ -62,7 +62,7 @@ def users_for_engine(engine_name: str) -> list[str]:
 
 
 def verify_format_and_uniqueness_name(engine_name: str) -> tuple[bool, str]:
-    app_search = _app_search_conn()
+    app_search = _app_search_admin_conn()
     # Check format is ok
     if not re.match(r"^[a-z0-9-]+$", engine_name):
         return (
@@ -127,7 +127,7 @@ def _api_key_name_to_email(api_key_name: str) -> str:
 
 
 def api_key_for_email(email: str) -> str:
-    app_search = _app_search_conn()
+    app_search = _app_search_admin_conn()
 
     api_key_name = _email_to_api_key_name(email)
     api_key = app_search.get_api_key(api_key_name=api_key_name)
@@ -138,7 +138,7 @@ def api_key_for_email(email: str) -> str:
 def create_elastic_credentials(
     email: str,
 ) -> Tuple[str, str]:
-    app_search = _app_search_conn()
+    app_search = _app_search_admin_conn()
 
     api_key_name = _email_to_api_key_name(email)
 
@@ -174,7 +174,7 @@ def create_engine(engine, user_email):
     if engine[:14] != "source-custom-":
         raise ValueError("Engine name must start with 'source-custom-'")
 
-    app_search = _app_search_conn()
+    app_search = _app_search_admin_conn()
     try:
         app_search.create_engine(engine_name=engine, language="nl", type="default")
     except Exception as e:
