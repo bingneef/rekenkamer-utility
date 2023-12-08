@@ -14,21 +14,16 @@ dotenv.load_dotenv()
 DEFAULT_ENGINES = ["source-main"]
 
 
-def _app_search_get_conn(search_api_key) -> AppSearch:
+def _app_search_user_conn(search_api_key) -> AppSearch:
     return AppSearch(
-        os.getenv("ENGINE_BASE_URL"), bearer_auth=f"private-{search_api_key}"
+        os.getenv("ENGINE_BASE_URL"), basic_auth=f"private-{search_api_key}"
     )
 
 
 def _app_search_admin_conn() -> AppSearch:
     return AppSearch(
-        os.getenv("ENGINE_BASE_URL"), bearer_auth=os.getenv("ENGINE_ADMIN_API_KEY")
-    )
-
-
-def _app_search_private_conn() -> AppSearch:
-    return AppSearch(
-        os.getenv("ENGINE_BASE_URL"), bearer_auth=os.getenv("ENGINE_PRIVATE_API_KEY")
+        os.getenv("ENGINE_BASE_URL"),
+        basic_auth=os.getenv("ENTERPRISE_SEARCH_BASIC_AUTH"),
     )
 
 
@@ -67,7 +62,7 @@ def users_for_engine(engine_name: str) -> list[str]:
 
 
 def verify_format_and_uniqueness_name(engine_name: str) -> tuple[bool, str]:
-    app_search = _app_search_private_conn()
+    app_search = _app_search_admin_conn()
     # Check format is ok
     if not re.match(r"^[a-z0-9-]+$", engine_name):
         return (
@@ -179,7 +174,7 @@ def create_engine(engine, user_email):
     if engine[:14] != "source-custom-":
         raise ValueError("Engine name must start with 'source-custom-'")
 
-    app_search = _app_search_private_conn()
+    app_search = _app_search_admin_conn()
     try:
         app_search.create_engine(engine_name=engine, language="nl", type="default")
     except Exception as e:
@@ -234,7 +229,7 @@ def update_elastic_engine_credentials(
 
 
 def delete_engine(engine, search_api_key):
-    app_search = _app_search_get_conn(search_api_key)
+    app_search = _app_search_user_conn(search_api_key)
     app_search.delete_engine(engine_name=engine)
 
     return True
