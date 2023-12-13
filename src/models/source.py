@@ -1,3 +1,8 @@
+from src.util.airflow import (
+    check_custom_source_running,
+    check_custom_source_scheduled,
+    get_source_status,
+)
 from src.util.db import get_conn_sources
 from dataclasses import dataclass, asdict
 from src.util.app_engine import (
@@ -54,7 +59,7 @@ class Source:
         ]
 
     @staticmethod
-    def get_source(source_key: str, fallback=False, check_status=False) -> "Source":
+    def get_source(source_key: str, fallback=False) -> "Source":
         # Use regex to allow for bulk keys
         source_match = {"source": {"$regex": source_key}}
         if source_key[:14] == "source-custom-":
@@ -69,8 +74,20 @@ class Source:
         )
         sources = list(sources)
 
-        # FIXME: This is a tmp hack till we can actually find the status
-        status = "Done"
+        # FIXME: Add documentation
+        if len(sources) == 0:
+            if fallback:
+                return Source(
+                    key=source_key,
+                    document_count=0,
+                    status=None,
+                    start_date=None,
+                    end_date=None,
+                )
+            else:
+                return None
+
+        source = sources[0]
 
         start_date_doc = get_conn_sources()[table_name].find_one(
             {**source_match, "stored": True}, sort=[("published_at", 1)]
@@ -92,7 +109,7 @@ class Source:
         return Source(
             key=source_key,
             document_count=source["count"],
-            status=status,
+            status=None,
             start_date=start_date,
             end_date=end_date,
         )

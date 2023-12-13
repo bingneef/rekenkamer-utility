@@ -61,9 +61,9 @@ def get_source(source_key):
         ):
             json_abort(404, "Source not found")
 
-        source = Source.get_source(source_key, fallback=True, check_status=True)
+        source = Source.get_source(source_key, fallback=True)
     else:
-        source = Source.get_source(source_key, check_status=True)
+        source = Source.get_source(source_key)
 
         if source is None:
             json_abort(404, "Source not found")
