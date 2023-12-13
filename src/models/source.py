@@ -1,8 +1,3 @@
-from src.util.airflow import (
-    check_custom_source_running,
-    check_custom_source_scheduled,
-    get_source_status,
-)
 from src.util.db import get_conn_sources
 from dataclasses import dataclass, asdict
 from src.util.app_engine import (
