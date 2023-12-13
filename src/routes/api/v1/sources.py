@@ -1,7 +1,6 @@
 from src.errors.translation import translate_error
 from src.models.source import Source
 from src.models.user import User
-from src.util.airflow import create_custom_source_job
 from src.util.app_engine import (
     verify_access,
     verify_format_and_uniqueness_name,
@@ -122,8 +121,6 @@ def create_source_documents(source_key):
             file_path=f"{source_key[14:]}/{document['filename']}",
         )
 
-    create_custom_source_job(source=source_key[14:])
-
     return {"success": True}
 
 
@@ -147,8 +144,6 @@ def remove_source_document(source_key, filename):
 
     if not success:
         json_abort(500, "An error occurred")
-
-    create_custom_source_job(source=source_key[14:])
 
     return {"success": success}
 

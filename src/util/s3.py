@@ -6,8 +6,8 @@ from minio import Minio
 from datetime import timedelta
 
 MINIO_HOST = os.getenv("MINIO_HOST", "localhost:9000")
-MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "airflow")
-MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "airflow1")
+MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "minio")
+MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "minio123")
 MINIO_SECURE = os.getenv("MINIO_SECURE", 0)
 
 

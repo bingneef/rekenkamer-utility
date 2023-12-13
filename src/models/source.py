@@ -1,8 +1,3 @@
-from src.util.airflow import (
-    check_custom_source_running,
-    check_custom_source_scheduled,
-    get_source_status,
-)
 from src.util.db import get_conn_sources
 from dataclasses import dataclass, asdict
 from src.util.app_engine import (
@@ -74,54 +69,8 @@ class Source:
         )
         sources = list(sources)
 
-        # FIXME: Add documentation
-        if len(sources) == 0:
-            if fallback:
-                status = None
-                if check_status:
-                    status = "PREPARING"
-                    if source_key[:14] == "source-custom-":
-                        if not check_custom_source_scheduled(
-                            source_key[14:]
-                        ) and not check_custom_source_running(source_key[14:]):
-                            status = "FAILED"
-
-                return Source(
-                    key=source_key,
-                    document_count=0,
-                    status=status,
-                    start_date=None,
-                    end_date=None,
-                )
-            else:
-                return None
-
-        source = sources[0]
-
-        # FIXME: Add documentation
-        status = None
-        if check_status:
-            if source_key[:14] == "source-custom-":
-                in_progress = check_custom_source_running(source_key[14:])
-
-                if in_progress:
-                    status = "IN_PROGRESS"
-                elif source["count"] > 0:
-                    incomplete_document = get_conn_sources()[table_name].find_one(
-                        {**source_match, "stored": False},
-                    )
-
-                    if incomplete_document is None:
-                        status = "DONE"
-                    else:
-                        status = "FAILED"
-                elif check_custom_source_scheduled(source_key[14:]):
-                    status = "PREPARING"
-                else:
-                    status = "FAILED"
-
-            else:
-                status = get_source_status(source_key)
+        # FIXME: This is a tmp hack till we can actually find the status
+        status = "Done"
 
         start_date_doc = get_conn_sources()[table_name].find_one(
             {**source_match, "stored": True}, sort=[("published_at", 1)]
