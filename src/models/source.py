@@ -75,7 +75,7 @@ class Source:
                 return Source(
                     key=source_key,
                     document_count=0,
-                    status=None,
+                    status="UNKNOWN",
                     start_date=None,
                     end_date=None,
                 )
@@ -104,7 +104,7 @@ class Source:
         return Source(
             key=source_key,
             document_count=source["count"],
-            status=None,
+            status="UNKNOWN",
             start_date=start_date,
             end_date=end_date,
         )
